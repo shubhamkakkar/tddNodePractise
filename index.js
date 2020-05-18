@@ -1,6 +1,7 @@
 const express = require("express");
 const dotenv = require("dotenv");
 const mongoose = require("mongoose");
+const cors = require("cors");
 const bodyParser = require("body-parser");
 const app = express();
 dotenv.config();
@@ -13,6 +14,7 @@ mongoose
     app.use(bodyParser.urlencoded({ extended: true }));
     // parse application/json
     app.use(bodyParser.json());
+    app.use(cors());
     app.use("/", router);
     app.listen(3000, () => console.log("connection running"));
   })
