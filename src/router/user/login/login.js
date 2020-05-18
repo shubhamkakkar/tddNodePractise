@@ -1,6 +1,7 @@
 const express = require("express");
+const User = require("../../../schema/User");
 const router = express.Router();
-
+const { bcryptPasswordFn, userReturnWithJWT } = require("../helper");
 router.post("/", (req, res, next) => {
   const { email, password } = req.body;
   if (!email) {
@@ -12,7 +13,12 @@ router.post("/", (req, res, next) => {
   }
 
   if (/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(email)) {
-    return res.status(200).send({ message: "success" });
+    User.findOne({ email }).then((user) => {
+      if (user) {
+      } else {
+        return res.status(400).send({ message: "User does not exists" });
+      }
+    });
   } else {
     return res.status(400).send({ message: "Email is invalid" });
   }

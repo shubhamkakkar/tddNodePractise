@@ -35,12 +35,22 @@ describe("/user/login email should be valid ( email and passwords are recieved  
     });
   });
 
-  it("valid email is recieved", async () => {
-    const result = await apiCall({ email: "abc@abc.com", password: "abc" });
-
-    expect(result.status).toBe(200);
+  it("valid email is recieved - unknow user input", async () => {
+    const email = "shubhamkakkar@a.com";
+    const result = await apiCall({ email, password: "abc" });
+    expect(result.status).toBe(400);
     expect(result.data).toEqual({
-      message: "success",
+      message: "User does not exists",
     });
+  });
+
+  it("valid email is recieved - known user input", async () => {
+    const email = "abc@ab.com";
+    const result = await apiCall({ email, password: "abc" });
+    expect(result.status).toBe(200);
+    expect(result.data.user.email).toBe(email);
+    expect(result.data.user.role).toBeOneOf(["user", "admin"]);
+    expect(result.data.user.token).not.toBeUndefined();
+    expect(result.data.user._id).not.toBeUndefined();
   });
 });
