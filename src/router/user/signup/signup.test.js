@@ -71,7 +71,7 @@ describe("/user/signup email should be valid ( email , password, and confirm pas
     });
   });
 
-  it("valid email is recieved but passwords do match", async () => {
+  it("valid email is recieved but passwords do match - role not given - same user", async () => {
     const result = await apiCall({
       email: "abc@ab.com",
       password: "abc",
@@ -79,7 +79,60 @@ describe("/user/signup email should be valid ( email , password, and confirm pas
     });
     expect(result.status).toBe(200);
     expect(result.data).toEqual({
-      message: "success",
+      message: "User already exists",
     });
+  });
+
+  it("valid email is recieved but passwords do match - role not given - different user", async () => {
+    /**
+     * TODO : please change the user email everytime this test is run, else this will fail
+     */
+
+    const email = "emw@ab.com";
+
+    const result = await apiCall({
+      email,
+      password: "abc",
+      confirmPassword: "abc",
+    });
+    expect(result.status).toBe(200);
+    expect(result.data.user.email).toBe(email);
+    expect(result.data.user.role).toBe("user");
+    expect(result.data.user.token).not.toBeUndefined();
+    expect(result.data.user._id).not.toBeUndefined();
+  });
+
+  it("valid email is recieved but passwords do match - role given - same user ", async () => {
+    const result = await apiCall({
+      email: "abc@ab.com",
+      password: "abc",
+      confirmPassword: "abc",
+      role: "admin",
+    });
+    expect(result.status).toBe(200);
+    expect(result.data).toEqual({
+      message: "User already exists",
+    });
+  });
+
+  it("valid email is recieved but passwords do match - role given - different user ", async () => {
+    /**
+     * TODO : please change the user email everytime this test is run, else this will fail
+     */
+
+    const email = "em@ab.com";
+    const role = "admin";
+
+    const result = await apiCall({
+      email,
+      password: "abc",
+      confirmPassword: "abc",
+      role,
+    });
+    expect(result.status).toBe(200);
+    expect(result.data.user.email).toBe(email);
+    expect(result.data.user.role).toBe(role);
+    expect(result.data.user.token).not.toBeUndefined();
+    expect(result.data.user._id).not.toBeUndefined();
   });
 });

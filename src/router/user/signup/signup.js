@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const { bcryptPasswordFn } = require("../helper");
+const { bcryptPasswordFn, userReturnWithJWT } = require("../helper");
 const User = require("../../../schema/User.js");
 router.post("/", (req, res, next) => {
   const { email, password, confirmPassword, role = "user" } = req.body;
@@ -25,9 +25,30 @@ router.post("/", (req, res, next) => {
       return res.status(400).send({ message: "Passwords do not match" });
     }
 
-    const bcryptPassword = bcryptPasswordFn(password);
-
-    const newUser = new User({ email, password: bcryptPassword, role });
+    User.findOne({ email })
+      .then((user) => {
+        if (user === null) {
+          const bcryptPassword = bcryptPasswordFn(password);
+          // return res.status(200).send({ message: "working" });
+          const newUser = new User({ email, password: bcryptPassword, role });
+          newUser
+            .save()
+            .then(({ _doc: { password, __v, ...rest } }) => {
+              const user = userReturnWithJWT(rest);
+              return res.status(200).send({ user });
+            })
+            .catch((er) => {
+              console.log({ er });
+              return res.status(500).send({ message: "Internal server error" });
+            });
+        } else {
+          return res.status(200).send({ message: "User already exists" });
+        }
+      })
+      .catch((er) => {
+        console.log({ er });
+        return res.status(500).send({ message: "Internal server error" });
+      });
   } else {
     return res.status(400).send({ message: "Email is invalid" });
   }
