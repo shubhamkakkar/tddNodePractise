@@ -1,7 +1,8 @@
+const bcrypt = require("bcryptjs");
 const express = require("express");
 const User = require("../../../schema/User");
 const router = express.Router();
-const { bcryptPasswordFn, userReturnWithJWT } = require("../helper");
+const { userReturnWithJWT } = require("../helper");
 router.post("/", (req, res, next) => {
   const { email, password } = req.body;
   if (!email) {
@@ -13,12 +14,24 @@ router.post("/", (req, res, next) => {
   }
 
   if (/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(email)) {
-    User.findOne({ email }).then((user) => {
-      if (user) {
-      } else {
-        return res.status(400).send({ message: "User does not exists" });
-      }
-    });
+    User.findOne({ email })
+      .then((user) => {
+        if (user) {
+          if (bcrypt.compareSync(password, user.password)) {
+            const { password, __v, ...rest } = user._doc;
+            const userTemp = userReturnWithJWT(rest);
+            return res.status(200).send({ user: userTemp });
+          } else {
+            return res.status(401).send({ message: "Password do not match" });
+          }
+        } else {
+          return res.status(400).send({ message: "User does not exists" });
+        }
+      })
+      .catch((er) => {
+        console.log({ er });
+        return res.status(500).send({ message: "Internal server error" });
+      });
   } else {
     return res.status(400).send({ message: "Email is invalid" });
   }

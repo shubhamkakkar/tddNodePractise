@@ -44,12 +44,21 @@ describe("/user/login email should be valid ( email and passwords are recieved  
     });
   });
 
-  it("valid email is recieved - known user input", async () => {
+  it("valid email is recieved - known user input - wrong password ", async () => {
+    const email = "abc@ab.com";
+    const result = await apiCall({ email, password: "password" });
+    expect(result.status).toBe(401);
+    expect(result.data).toEqual({
+      message: "Password do not match",
+    });
+  });
+
+  it("valid email is recieved - known user input - correct password", async () => {
     const email = "abc@ab.com";
     const result = await apiCall({ email, password: "abc" });
     expect(result.status).toBe(200);
     expect(result.data.user.email).toBe(email);
-    expect(result.data.user.role).toBeOneOf(["user", "admin"]);
+    expect(result.data.user.role).not.toBeUndefined();
     expect(result.data.user.token).not.toBeUndefined();
     expect(result.data.user._id).not.toBeUndefined();
   });
