@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const { bcryptPasswordFn, userReturnWithJWT } = require("../helper");
 const User = require("../../../schema/User.js");
+const { ErrorHandler } = require("../../../customHandlers/error");
 router.post("/", (req, res, next) => {
   const { email, password, confirmPassword, role = "user" } = req.body;
   /*
@@ -9,20 +10,20 @@ router.post("/", (req, res, next) => {
    */
 
   if (!email) {
-    return res.status(400).send({ message: "Email is required" });
+    return next(new ErrorHandler(400, "Email is required"));
   }
 
   if (!password) {
-    return res.status(400).send({ message: "Password is required" });
+    return next(new ErrorHandler(400, "Password is required"));
   }
 
   if (!confirmPassword) {
-    return res.status(400).send({ message: "Confirm password is required" });
+    return next(new ErrorHandler(400, "Confirm password is required"));
   }
 
   if (/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(email)) {
     if (password !== confirmPassword) {
-      return res.status(400).send({ message: "Passwords do not match" });
+      return next(new ErrorHandler(400, "Passwords do not match"));
     }
 
     User.findOne({ email })
@@ -39,7 +40,7 @@ router.post("/", (req, res, next) => {
             })
             .catch((er) => {
               console.log({ er });
-              return res.status(500).send({ message: "Internal server error" });
+              return next(new ErrorHandler(500, "Internal server error"));
             });
         } else {
           return res.status(200).send({ message: "User already exists" });
@@ -47,10 +48,10 @@ router.post("/", (req, res, next) => {
       })
       .catch((er) => {
         console.log({ er });
-        return res.status(500).send({ message: "Internal server error" });
+        return next(new ErrorHandler(500, "Internal server error"));
       });
   } else {
-    return res.status(400).send({ message: "Email is invalid" });
+    return next(new ErrorHandler(400, "Email is invalid"));
   }
 });
 

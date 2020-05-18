@@ -88,7 +88,7 @@ describe("/user/signup email should be valid ( email , password, and confirm pas
      * TODO : please change the user email everytime this test is run, else this will fail
      */
 
-    const email = "emw@ab.com";
+    const email = "random2@ab.com";
 
     const result = await apiCall({
       email,
@@ -120,7 +120,7 @@ describe("/user/signup email should be valid ( email , password, and confirm pas
      * TODO : please change the user email everytime this test is run, else this will fail
      */
 
-    const email = "em@ab.com";
+    const email = "amin2@admin.com";
     const role = "admin";
 
     const result = await apiCall({
