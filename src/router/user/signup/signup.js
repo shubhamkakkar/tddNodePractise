@@ -1,8 +1,13 @@
 const express = require("express");
 const router = express.Router();
-
+const { bcryptPasswordFn } = require("../helper");
+const User = require("../../../schema/User.js");
 router.post("/", (req, res, next) => {
-  const { email, password, confirmPassword } = req.body;
+  const { email, password, confirmPassword, role = "user" } = req.body;
+  /*
+   * role if not given -> considered as user
+   */
+
   if (!email) {
     return res.status(400).send({ message: "Email is required" });
   }
@@ -20,8 +25,9 @@ router.post("/", (req, res, next) => {
       return res.status(400).send({ message: "Passwords do not match" });
     }
 
-    return res.status(200).send({ message: "success" });
-    // email is valid
+    const bcryptPassword = bcryptPasswordFn(password);
+
+    const newUser = new User({ email, password: bcryptPassword, role });
   } else {
     return res.status(400).send({ message: "Email is invalid" });
   }
